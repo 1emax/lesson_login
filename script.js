@@ -1,4 +1,9 @@
-const isLogined = true;
+let isLogined = false;
+
+const currentLogin = localStorage.getItem("login")
+if (currentLogin) {
+	isLogined = true
+}
 
 if (isLogined) {
 	document.querySelector("#registration").className = "hidden"
@@ -23,7 +28,8 @@ function handleLoginForm(event) {
 	const password = passwordTag.value;
 
 	console.log(login, password, loginTag, passwordTag)
-	// localStorage.setItem(`login`, login)
+	localStorage.setItem(`login`, login)
 }
 
 document.querySelector("#loginForm form").addEventListener('submit', handleLoginForm)
+
