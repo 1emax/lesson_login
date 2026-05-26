@@ -1,3 +1,30 @@
 .hidden {
 	display: none;
 }
+.eye {
+  width: 40px;
+  height: 24px;
+  background-color: #fff;
+  border-radius: 80% 10%; /* Creates the almond shape */
+  transform: rotate(45deg);
+  position: relative;
+  border: 2px solid #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.eye::before {
+  content: '';
+  width: 12px;
+  height: 12px;
+  background-color: #000;
+  border-radius: 50%; /* The pupil */
+}
+
+.eye-parent {
+	display: inline-block;
+	min-height: 22px;
+	min-width: 22px;
+	cursor: pointer;
+}

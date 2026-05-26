@@ -28,8 +28,19 @@ function handleLoginForm(event) {
 	const password = passwordTag.value;
 
 	console.log(login, password, loginTag, passwordTag)
-	localStorage.setItem(`login`, login)
+	localStorage.setItem(`login`, login) // !!!
+}
+
+function yeyReact(event) {
+	const passTag = document.querySelector("#password")
+	if (passTag.type == "password") {
+		password.type = "text"
+	} else {
+		password.type = "password"
+	}
 }
 
 document.querySelector("#loginForm form").addEventListener('submit', handleLoginForm)
+
+document.querySelector(".eye-parent").addEventListener("click", yeyReact)
 
