@@ -3,226 +3,93 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>Кабінет розробника | Урок JS</title>
-	<link rel="stylesheet" type="text/css" href="style.css">
-	<!-- Google Fonts для сучасного вигляду -->
-	<link rel="preconnect" href="https://fonts.googleapis.com">
-	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-	<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+	<title>DevTeen Camp | Урок JS</title>
+	<link rel="stylesheet" href="style.css">
 </head>
 <body>
 <!-- 
+Теми уроку:
+- if/else, querySelector, getElementById
+- array, object, Object.keys, Object.values
+- localStorage
+- document.createElement, appendChild
+- for (let i ...) цикл
+- innerHeight
+- setInterval, requestAnimationFrame
+- CSS animation, media queries
+- валідація email
+- FileReader (фото з диску)
+-->
 
-Сайт з реєстрецією та логіном + адаптивна трохи верстка
-
-Треба форма логін + пароль + кнопка логін (показувати лише коли не залогінені)
-зберігати пароль в браузері
-форма реєстрації (показувати лише коли не залогінені)
-
-if else, querySelector
-array, object
-localstorage
-можливо валідація (hi-to-all@gmail.com.)
-
-user name, login, password (required)
-hidden/showed passwoord
-date of birth
-man/woman
---  додати фото з диску (компʼютер)
-
- -->
-
-<div class="app-container">
-	<!-- Заголовок сайту -->
-	<header class="app-header">
-		<div class="logo">🚀 DevTeen <span>Camp</span></div>
-		<p class="subtitle">Практичне завдання: Системи авторизації на JavaScript</p>
+<div class="app" id="app">
+	<header>
+		<h1 class="logo pulse">🚀 DevTeen</h1>
+		<!-- setInterval оновлює годинник щосекунди -->
+		<span id="clock"></span>
 	</header>
 
-	<main class="main-card">
-		<!-- Перемикач Вхід / Реєстрація (видимий, коли користувач не увійшов) -->
-		<div id="authTabs" class="tabs-container">
-			<button id="tabLogin" class="tab-btn active" onclick="switchTab('login')">Вхід</button>
-			<button id="tabRegister" class="tab-btn" onclick="switchTab('register')">Реєстрація</button>
+	<!-- requestAnimationFrame рухає кульку -->
+	<div class="track">
+		<div id="ball" class="ball"></div>
+	</div>
+
+	<!-- Форми (видимі коли НЕ залогінений) -->
+	<div id="authSection">
+
+		<!-- Форма логіну -->
+		<div class="card">
+			<h2>Вхід</h2>
+			<form id="loginForm">
+				<input id="loginEmail" type="text" placeholder="Логін (email)" required>
+				<div class="pass-wrap">
+					<input id="loginPass" type="password" placeholder="Пароль" required>
+					<button type="button" class="eye" onclick="togglePass('loginPass')">👁</button>
+				</div>
+				<button type="submit" class="btn">Увійти</button>
+			</form>
 		</div>
 
-		<!-- Повідомлення про помилки або статус операцій -->
-		<div id="statusMessage" class="status-msg hidden"></div>
-
-		<!-- ================= ФОРМА ВХОДУ ================= -->
-		<section id="loginSection" class="auth-section">
-			<div class="section-header">
-				<h2>З поверненням!</h2>
-				<p>Вкажи свій логін та пароль, щоб увійти в кабінет</p>
-			</div>
-
-			<form id="loginForm">
-				<div class="input-group">
-					<label for="loginEmail">Логін (Email або ім'я)</label>
-					<input id="loginEmail" type="text" name="login" required placeholder="example@gmail.com">
+		<!-- Форма реєстрації -->
+		<div class="card">
+			<h2>Реєстрація</h2>
+			<form id="regForm">
+				<input id="regName" type="text" placeholder="Ім'я" required>
+				<input id="regLogin" type="email" placeholder="Email (логін)" required>
+				<div class="pass-wrap">
+					<input id="regPass" type="password" placeholder="Пароль (мін. 6)" required>
+					<button type="button" class="eye" onclick="togglePass('regPass')">👁</button>
 				</div>
-
-				<div class="input-group">
-					<label for="loginPassword">Пароль</label>
-					<div class="password-wrapper">
-						<input id="loginPassword" type="password" name="password" required placeholder="••••••••">
-						<button type="button" class="eye-btn" onclick="togglePasswordVisibility('loginPassword', this)">
-							<!-- SVG іконка ока (відкрите за замовчуванням) -->
-							<svg class="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-								<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-								<circle cx="12" cy="12" r="3"></circle>
-							</svg>
-						</button>
-					</div>
+				<input id="regDob" type="date" required>
+				<div class="gender-row">
+					<label><input type="radio" name="gender" value="man" checked> Хлопець 👦</label>
+					<label><input type="radio" name="gender" value="woman"> Дівчина 👧</label>
 				</div>
-
-				<div class="form-footer-actions">
-					<label class="checkbox-container">
-						<input type="checkbox" id="rememberMe">
-						<span class="checkmark"></span>
-						Запам'ятати мене
-					</label>
-				</div>
-
-				<button type="submit" class="btn-primary">Увійти в кабінет</button>
+				<label class="file-label">
+					Фото з компʼютера: <input id="regAvatar" type="file" accept="image/*">
+				</label>
+				<button type="submit" class="btn">Зареєструватися</button>
 			</form>
-		</section>
+		</div>
+	</div>
 
-		<!-- ================= ФОРМА РЕЄСТРАЦІЇ ================= -->
-		<section id="registerSection" class="auth-section hidden">
-			<div class="section-header">
-				<h2>Створи акаунт розробника</h2>
-				<p>Заповни кілька простих полів, щоб приєднатися до групи</p>
-			</div>
+	<!-- Профіль (видимий коли залогінений) -->
+	<div id="profileSection" class="card hidden">
+		<h2 id="welcomeText">Привіт!</h2>
+		<img id="profileImg" class="avatar hidden" src="" alt="avatar">
+		<!-- Object.keys + for i заповнюють цей список -->
+		<ul id="profileDetails"></ul>
+		<button class="btn btn-red" onclick="logout()">Вийти 🚪</button>
+	</div>
 
-			<form id="registerForm">
-				<div class="input-grid">
-					<!-- Ліва колонка -->
-					<div class="grid-col">
-						<div class="input-group">
-							<label for="regName">Ім'я та прізвище</label>
-							<input id="regName" type="text" name="name" required placeholder="Іван Коваленко">
-						</div>
+	<!-- Список зареєстрованих (createElement + appendChild) -->
+	<div class="card">
+		<h3>Зареєстровані розробники:</h3>
+		<ul id="userList"></ul>
+	</div>
 
-						<div class="input-group">
-							<label for="regEmail">Логін (Email для валідації)</label>
-							<input id="regEmail" type="email" name="login" required placeholder="coder@gmail.com">
-							<span class="input-hint">Приклад: hi-to-all@gmail.com</span>
-						</div>
-
-						<div class="input-group">
-							<label for="regPassword">Пароль</label>
-							<div class="password-wrapper">
-								<input id="regPassword" type="password" name="password" required placeholder="Мінімум 6 символів">
-								<button type="button" class="eye-btn" onclick="togglePasswordVisibility('regPassword', this)">
-									<svg class="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-										<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-										<circle cx="12" cy="12" r="3"></circle>
-									</svg>
-								</button>
-							</div>
-						</div>
-					</div>
-
-					<!-- Права колонка -->
-					<div class="grid-col">
-						<div class="input-group">
-							<label for="regDob">Дата народження</label>
-							<input id="regDob" type="date" name="dob" required>
-						</div>
-
-						<div class="input-group">
-							<label>Стать</label>
-							<div class="gender-selector">
-								<label class="gender-option">
-									<input type="radio" name="gender" value="man" checked>
-									<span class="gender-box">Хлопець 👦</span>
-								</label>
-								<label class="gender-option">
-									<input type="radio" name="gender" value="woman">
-									<span class="gender-box">Дівчина 👧</span>
-								</label>
-							</div>
-						</div>
-
-						<!-- Фото профілю / Аватар -->
-						<div class="input-group">
-							<label>Фото профілю (З комп'ютера або готовий аватар)</label>
-							
-							<div class="avatar-setup-container">
-								<!-- Кругле прев'ю -->
-								<div class="avatar-preview-wrapper">
-									<img id="regAvatarPreview" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'><rect width='100' height='100' fill='%232a3042'/><text x='50%' y='55%' font-size='40' text-anchor='middle' dominant-baseline='middle'>💻</text></svg>" alt="Прев'ю аватара">
-									<label for="regAvatarFile" class="avatar-upload-overlay">
-										<span>Завантажити 📸</span>
-									</label>
-								</div>
-								
-								<div class="avatar-choices">
-									<!-- Швидкі емодзі-аватари, які дуже подобаються підліткам -->
-									<div class="emoji-presets">
-										<button type="button" class="emoji-preset-btn" onclick="selectEmojiPreset('🤖')">🤖</button>
-										<button type="button" class="emoji-preset-btn" onclick="selectEmojiPreset('🦊')">🦊</button>
-										<button type="button" class="emoji-preset-btn" onclick="selectEmojiPreset('🚀')">🚀</button>
-										<button type="button" class="emoji-preset-btn" onclick="selectEmojiPreset('👾')">👾</button>
-										<button type="button" class="emoji-preset-btn" onclick="selectEmojiPreset('🐱')">🐱</button>
-									</div>
-									<input id="regAvatarFile" type="file" name="avatar" accept="image/*" class="hidden-file-input">
-									<span class="upload-hint">Натисни на коло або вибери емодзі</span>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-
-				<button type="submit" class="btn-primary" style="margin-top: 1.5rem;">Зареєструватися</button>
-			</form>
-		</section>
-
-		<!-- ================= КАБІНЕТ / ПРОФІЛЬ КОРИСТУВАЧА ================= -->
-		<section id="profileSection" class="auth-section hidden">
-			<div class="profile-card">
-				<!-- Блискучий ефект на фоні -->
-				<div class="glow-bg"></div>
-				
-				<div class="profile-header">
-					<div class="profile-avatar-container">
-						<img id="profileImage" src="" alt="Фото профілю">
-						<span class="badge-online">Online</span>
-					</div>
-					<h2 id="profileWelcomeName">Привіт, Кодер! 👋</h2>
-					<p class="profile-status">Акаунт активовано • Студент DevTeen</p>
-				</div>
-
-				<div class="profile-details-grid">
-					<div class="detail-item">
-						<span class="detail-label">Логін (Email)</span>
-						<span id="profileLogin" class="detail-value">-</span>
-					</div>
-					<div class="detail-item">
-						<span class="detail-label">Ім'я</span>
-						<span id="profileName" class="detail-value">-</span>
-					</div>
-					<div class="detail-item">
-						<span class="detail-label">Дата народження</span>
-						<span id="profileDob" class="detail-value">-</span>
-					</div>
-					<div class="detail-item">
-						<span class="detail-label">Стать</span>
-						<span id="profileGender" class="detail-value">-</span>
-					</div>
-				</div>
-
-				<div class="profile-actions">
-					<button class="btn-secondary" onclick="logout()">Вийти з акаунту 🚪</button>
-				</div>
-			</div>
-		</section>
-	</main>
-
-	<!-- Футер -->
-	<footer class="app-footer">
-		<p>&copy; 2026 DevTeen Camp. Зроблено з любов'ю до JavaScript 💻💛</p>
+	<footer>
+		<p id="screenInfo"></p>
+		<p>© 2026 DevTeen Camp 💻</p>
 	</footer>
 </div>
 

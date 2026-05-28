@@ -1,310 +1,257 @@
-/**
- * DevTeen Camp - JavaScript для кабінету користувача
- * Навчальний скрипт з детальними коментарями для майбутніх розробників (11-15 років)
- */
+// ============================================
+// DevTeen Camp — Урок JavaScript
+// ============================================
 
-// 1. ГЛОБАЛЬНІ ЗМІННІ (СТАН ДОДАТКУ)
-// Тут ми зберігаємо тимчасові дані під час роботи програми
-let selectedAvatarData = ""; // Сюди запишемо картинку аватара в кодованому форматі (Base64)
 
-// 2. ІНІЦІАЛІЗАЦІЯ ПРИ ЗАВАНТАЖЕННІ СТОРІНКИ
-// Цей код виконається одразу, як тільки браузер прочитає файл
-document.addEventListener("DOMContentLoaded", () => {
-    // Встановимо дефолтний емодзі-аватар при першому запуску
-    selectEmojiPreset("🤖");
-    
-    // Перевіряємо, чи є вже залогінений користувач у браузері
-    checkSession();
-    
-    // Додаємо слухачі подій на наші форми (відстежуємо натискання кнопок відправки)
-    document.getElementById("loginForm").addEventListener("submit", handleLogin);
-    document.getElementById("registerForm").addEventListener("submit", handleRegister);
+// --- 1. МАСИВИ (Array) та ОБ'ЄКТИ (Object) ---
 
-    // Додаємо слухач на зміну файлу аватара
-    document.getElementById("regAvatarFile").addEventListener("change", handleFileSelect);
+// ЩО ТАКЕ ОБ'ЄКТ?
+// Об'єкт — це як паспорт або картка учня: набір полів із підписами.
+// У масиві дані лежать просто по номерах: ["Іван", 15, "Київ"]
+//   — незрозуміло, що є що: де ім'я, де вік, де місто?
+// В об'єкті кожне значення має КЛЮЧ (назву):
+//   { name: "Іван", age: 15, city: "Київ" }
+//   — одразу видно: name — це ім'я, age — вік, city — місто.
+//
+// КОЛИ ВИКОРИСТОВУВАТИ?
+// Масив — коли є список однакових речей: ["яблуко", "банан", "вишня"]
+// Об'єкт — коли треба описати ОДНУ річ з різними властивостями.
+//
+// ЯК ЧИТАТИ / ЗАПИСУВАТИ?
+//   siteInfo.name        → "DevTeen Camp"   (через крапку)
+//   siteInfo["year"]     → 2026             (через квадратні дужки)
+//   siteInfo.year = 2027                    (змінити значення)
+
+// Простий об'єкт — інформація про сайт
+const siteInfo = {
+	name: "DevTeen Camp",
+	year: 2026,
+	language: "JavaScript"
+};
+console.log("Об'єкт siteInfo:", siteInfo);
+console.log("Читаємо через крапку:", siteInfo.name);          // "DevTeen Camp"
+console.log("Читаємо через дужки:", siteInfo["language"]);    // "JavaScript"
+
+// Object.keys — повертає МАСИВ усіх ключів об'єкта
+console.log("Object.keys:", Object.keys(siteInfo));   // ["name", "year", "language"]
+
+// Object.values — повертає МАСИВ усіх значень об'єкта
+console.log("Object.values:", Object.values(siteInfo)); // ["DevTeen Camp", 2026, "JavaScript"]
+
+// Простий масив
+const colors = ["red", "green", "blue"];
+console.log("Масив colors:", colors);
+console.log("Перший елемент:", colors[0]); // "red"
+
+// Масив користувачів — кожен елемент це об'єкт (як картка учня).
+// Тобто users — це "журнал" з "картками", наприклад:
+// [ {name:"Іван", login:"ivan@gmail.com"}, {name:"Оля", login:"olya@gmail.com"} ]
+let users = JSON.parse(localStorage.getItem("users") || "[]");
+
+
+// --- 2. innerHeight — висота вікна браузера ---
+document.getElementById("screenInfo").textContent =
+	"Висота вікна: " + window.innerHeight + "px";
+document.getElementById("app").style.minHeight = window.innerHeight + "px";
+
+
+// --- 3. setInterval — годинник (оновлюється щосекунди) ---
+document.getElementById("clock").textContent = new Date().toLocaleTimeString();
+
+setInterval(function() {
+	document.getElementById("clock").textContent = new Date().toLocaleTimeString();
+}, 1000);
+
+
+// --- 4. requestAnimationFrame — анімація кульки ---
+const ball = document.getElementById("ball");
+let ballX = 0;
+let ballSpeed = 2;
+
+function animateBall() {
+	const maxX = ball.parentElement.offsetWidth - ball.offsetWidth;
+	ballX += ballSpeed;
+
+	if (ballX >= maxX || ballX <= 0) {
+		ballSpeed = -ballSpeed; // змінюємо напрямок
+	}
+
+	ball.style.left = ballX + "px";
+	requestAnimationFrame(animateBall); // викликаємо себе знову (рекурсія)
+}
+requestAnimationFrame(animateBall);
+
+
+// --- 5. Показати / сховати пароль ---
+function togglePass(inputId) {
+	const input = document.getElementById(inputId);
+	// if else — перевіряємо поточний тип
+	if (input.type === "password") {
+		input.type = "text";
+	} else {
+		input.type = "password";
+	}
+}
+
+
+// --- 6. РЕЄСТРАЦІЯ (форма, валідація, масив, об'єкт, FileReader) ---
+document.getElementById("regForm").addEventListener("submit", function(event) {
+	event.preventDefault(); // зупиняємо перезавантаження сторінки
+
+	const name     = document.getElementById("regName").value.trim();
+	const login    = document.getElementById("regLogin").value.trim();
+	const password = document.getElementById("regPass").value;
+	const dob      = document.getElementById("regDob").value;
+	const gender   = document.querySelector('input[name="gender"]:checked').value;
+
+	// Валідація email через регулярний вираз
+	if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(login)) {
+		alert("❌ Введи правильний email, наприклад: hi-to-all@gmail.com");
+		return;
+	}
+	if (password.length < 6) {
+		alert("❌ Пароль мінімум 6 символів!");
+		return;
+	}
+
+	// for i — перевіряємо чи логін вже зайнятий
+	for (let i = 0; i < users.length; i++) {
+		if (users[i].login === login) {
+			alert("❌ Цей логін вже зайнятий!");
+			return;
+		}
+	}
+
+	// Створюємо об'єкт нового користувача.
+	// Це як заповнити нову картку учня: записати ім'я, пошту, пароль тощо.
+	// Потім ми покладемо цю "картку" в масив users (як у журнал класу).
+	const newUser = {
+		name: name,
+		login: login,
+		password: password,
+		dob: dob,
+		gender: gender === "man" ? "Хлопець" : "Дівчина",
+		avatar: ""
+	};
+	console.log("Новий користувач (об'єкт):", newUser);
+
+	// Зчитуємо фото з диску (FileReader)
+	const fileInput = document.getElementById("regAvatar");
+
+	if (fileInput.files[0]) {
+		const reader = new FileReader();
+		reader.onload = function(e) {
+			newUser.avatar = e.target.result;
+			saveAndLogin(newUser);
+		};
+		reader.readAsDataURL(fileInput.files[0]);
+	} else {
+		saveAndLogin(newUser);
+	}
 });
 
-// 3. ФУНКЦІЯ ПЕРЕВІРКИ СЕСІЇ (ЧИ ВЖЕ УВІЙШОВ КОРИСТУВАЧ)
-function checkSession() {
-    // localstorage - це вбудована база даних у браузері. Вона зберігає дані навіть після закриття вкладки!
-    const currentUserJson = localStorage.getItem("currentUser");
-
-    if (currentUserJson) {
-        // Якщо знайшли користувача, перетворюємо текст (JSON) назад у JavaScript-Об'єкт
-        const user = JSON.parse(currentUserJson);
-        showProfile(user);
-    } else {
-        // Якщо нікого немає, показуємо форми авторизації
-        showAuthForms();
-    }
+function saveAndLogin(user) {
+	users.push(user); // додаємо в масив
+	localStorage.setItem("users", JSON.stringify(users));
+	localStorage.setItem("currentUser", JSON.stringify(user));
+	renderUserList();
+	showProfile(user);
+	document.getElementById("regForm").reset();
 }
 
-// 4. ПЕРЕМИКАННЯ ТАБІВ (Вхід / Реєстрація)
-// querySelector допомагає нам знаходити будь-які теги на сторінці так само, як у CSS
-function switchTab(tab) {
-    const loginSec = document.getElementById("loginSection");
-    const registerSec = document.getElementById("registerSection");
-    const tabLogin = document.getElementById("tabLogin");
-    const tabRegister = document.getElementById("tabRegister");
-    
-    // Скидаємо повідомлення про статус при зміні вкладки
-    hideStatus();
 
-    if (tab === 'login') {
-        loginSec.classList.remove("hidden");
-        registerSec.classList.add("hidden");
-        tabLogin.classList.add("active");
-        tabRegister.classList.remove("active");
-    } else {
-        loginSec.classList.add("hidden");
-        registerSec.classList.remove("hidden");
-        tabLogin.classList.remove("active");
-        tabRegister.classList.add("active");
-    }
-}
+// --- 7. ВХІД (пошук в масиві через for i) ---
+document.getElementById("loginForm").addEventListener("submit", function(event) {
+	event.preventDefault();
 
-// 5. ПОКАЗАТИ / ПРИХОВАТИ ПАРОЛЬ
-// Проста функція, яка змінює тип input з password на text і навпаки
-function togglePasswordVisibility(inputId, btn) {
-    const input = document.getElementById(inputId);
-    const svg = btn.querySelector("svg");
-    
-    if (input.type === "password") {
-        input.type = "text";
-        btn.style.color = "var(--color-accent)"; // Робимо іконку кольоровою, коли пароль видно
-    } else {
-        input.type = "password";
-        btn.style.color = "var(--text-secondary)";
-    }
-}
+	const login    = document.getElementById("loginEmail").value.trim();
+	const password = document.getElementById("loginPass").value;
 
-// 6. РОБОТА З ФОТО (FileReader API)
-// Функція спрацьовує, коли учень вибирає файл зі свого комп'ютера
-function handleFileSelect(event) {
-    const file = event.target.files[0];
-    
-    if (file) {
-        // Перевіряємо розмір файлу (краще обмежити до 1.5MB, бо localStorage має ліміт ~5MB)
-        if (file.size > 1500 * 1024) {
-            showStatus("❌ Файл занадто великий! Виберіть фото менше 1.5 МБ.", "error");
-            return;
-        }
+	let found = null;
 
-        const reader = new FileReader();
-        
-        // onload виконається тоді, коли браузер повністю зчитає файл з диска
-        reader.onload = (e) => {
-            const base64String = e.target.result;
-            selectedAvatarData = base64String;
-            
-            // Оновлюємо прев'ю на формі реєстрації
-            document.getElementById("regAvatarPreview").src = base64String;
-        };
-        
-        // Зчитуємо картинку як DataURL (це перетворює її на довгий текстовий рядок)
-        reader.readAsDataURL(file);
-    }
-}
+	for (let i = 0; i < users.length; i++) {
+		if (users[i].login === login && users[i].password === password) {
+			found = users[i];
+			break; // знайшли — виходимо з циклу
+		}
+	}
 
-// Функція для швидкого вибору готового емодзі-аватара
-function selectEmojiPreset(emoji) {
-    // Створюємо красиву картинку SVG "на льоту" з вибраним емодзі всередині
-    const svgString = `<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'><rect width='100' height='100' rx='50' fill='%236366f1'/><text x='50%' y='58%' font-size='45' text-anchor='middle' dominant-baseline='middle'>${emoji}</text></svg>`;
-    
-    // Перетворюємо SVG на Base64 рядок
-    const base64String = "data:image/svg+xml;utf8," + encodeURIComponent(svgString);
-    selectedAvatarData = base64String;
-    
-    // Візуально показуємо, який аватар обрано
-    document.getElementById("regAvatarPreview").src = base64String;
-}
+	if (found) {
+		localStorage.setItem("currentUser", JSON.stringify(found));
+		showProfile(found);
+	} else {
+		alert("❌ Невірний логін або пароль!");
+	}
+});
 
-// 7. ВАЛІДАЦІЯ ТА РЕЄСТРАЦІЯ
-function handleRegister(event) {
-    // event.preventDefault() зупиняє перезавантаження сторінки при відправці форми!
-    // Це дозволяє нашому JavaScript обробити дані самостійно.
-    event.preventDefault();
-    hideStatus();
 
-    // Збираємо значення з полів форми реєстрації
-    const name = document.getElementById("regName").value.trim();
-    const login = document.getElementById("regEmail").value.trim();
-    const password = document.getElementById("regPassword").value;
-    const dob = document.getElementById("regDob").value;
-    
-    // Отримуємо значення радіо-кнопки (gender)
-    const gender = document.querySelector('input[name="gender"]:checked').value;
-
-    // ВАЛІДАЦІЯ за допомогою Регулярних Виразів (Regex)
-    // Перевіряємо, чи email має правильну структуру (наприклад, hi-to-all@gmail.com)
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailPattern.test(login)) {
-        showStatus("❌ Будь ласка, вкажи правильну електронну пошту (наприклад: hi-to-all@gmail.com)", "error");
-        return;
-    }
-
-    if (password.length < 6) {
-        showStatus("❌ Пароль має містити щонайменше 6 символів для безпеки!", "error");
-        return;
-    }
-
-    // Завантажуємо масив користувачів, або створюємо новий порожній масив, якщо це перший юзер
-    // Array + Objects у дії!
-    const users = JSON.parse(localStorage.getItem("users") || "[]");
-
-    // Перевіряємо, чи немає вже користувача з таким логіном
-    const userExists = users.some(u => u.login.toLowerCase() === login.toLowerCase());
-    if (userExists) {
-        showStatus("❌ Цей логін вже зайнятий іншим розробником. Спробуй інший!", "error");
-        return;
-    }
-
-    // Створюємо ОБ'ЄКТ нового користувача
-    const newUser = {
-        name: name,
-        login: login,
-        password: password, // Зберігаємо пароль (у навчальних цілях - відкритим)
-        dob: dob,
-        gender: gender,
-        avatar: selectedAvatarData
-    };
-
-    // Додаємо об'єкт у наш МАСИВ (Array.push)
-    users.push(newUser);
-
-    // Зберігаємо масив назад у localStorage, перетворивши його на рядок (JSON.stringify)
-    localStorage.setItem("users", JSON.stringify(users));
-
-    // Автоматично логінимо нового користувача для крутого юзер-експірієнсу!
-    localStorage.setItem("currentUser", JSON.stringify(newUser));
-    
-    showStatus("🎉 Реєстрація успішна! Ласкаво просимо в клуб!", "success");
-    
-    // Через 1.5 секунди оновлюємо екран та показуємо профіль
-    setTimeout(() => {
-        showProfile(newUser);
-        // Очищуємо поля форми реєстрації
-        document.getElementById("registerForm").reset();
-        selectEmojiPreset("🤖"); // скидаємо прев'ю на дефолт
-    }, 1200);
-}
-
-// 8. АВТОРИЗАЦІЯ (ВХІД)
-function handleLogin(event) {
-    event.preventDefault();
-    hideStatus();
-
-    const loginInput = document.getElementById("loginEmail").value.trim();
-    const passwordInput = document.getElementById("loginPassword").value;
-    const rememberMe = document.getElementById("rememberMe").checked;
-
-    // Завантажуємо масив користувачів
-    const users = JSON.parse(localStorage.getItem("users") || "[]");
-
-    // Шукаємо користувача з відповідним логіном та паролем (if else)
-    const foundUser = users.find(u => 
-        u.login.toLowerCase() === loginInput.toLowerCase() && 
-        u.password === passwordInput
-    );
-
-    if (foundUser) {
-        // Зберігаємо поточну сесію
-        localStorage.setItem("currentUser", JSON.stringify(foundUser));
-        
-        // Якщо учень поставив галочку "Запам'ятати мене", можемо зробити додатковий запис (для уроку)
-        if (rememberMe) {
-            localStorage.setItem("rememberedLogin", loginInput);
-        } else {
-            localStorage.removeItem("rememberedLogin");
-        }
-
-        showStatus("🔓 Вхід виконано! Завантажуємо профіль...", "success");
-
-        setTimeout(() => {
-            showProfile(foundUser);
-            document.getElementById("loginForm").reset();
-        }, 1000);
-    } else {
-        showStatus("❌ Невірний логін або пароль! Спробуй ще раз.", "error");
-    }
-}
-
-// 9. ОНОВЛЕННЯ ЕКРАНУ: ПОКАЗАТИ ПРОФІЛЬ КОРИСТУВАЧА
+// --- 8. ПОКАЗАТИ ПРОФІЛЬ (Object.keys + for i + createElement) ---
 function showProfile(user) {
-    // Ховаємо форми та перемикач табів
-    document.getElementById("authTabs").classList.add("hidden");
-    document.getElementById("loginSection").classList.add("hidden");
-    document.getElementById("registerSection").classList.add("hidden");
-    
-    // Показуємо кабінет
-    document.getElementById("profileSection").classList.remove("hidden");
-    
-    // Заповнюємо дані профілю
-    document.getElementById("profileWelcomeName").textContent = `Привіт, ${user.name}! 👋`;
-    document.getElementById("profileName").textContent = user.name;
-    document.getElementById("profileLogin").textContent = user.login;
-    
-    // Перетворюємо стать на красивий український текст з емодзі
-    const genderText = user.gender === "man" ? "Хлопець 👦" : "Дівчина 👧";
-    document.getElementById("profileGender").textContent = genderText;
+	document.getElementById("authSection").classList.add("hidden");
+	document.getElementById("profileSection").classList.remove("hidden");
 
-    // Форматуємо дату народження (наприклад, з 2012-05-15 робимо 15.05.2012)
-    if (user.dob) {
-        const parts = user.dob.split("-"); // Розбиваємо рядок по дефісу
-        if (parts.length === 3) {
-            document.getElementById("profileDob").textContent = `${parts[2]}.${parts[1]}.${parts[0]}`;
-        } else {
-            document.getElementById("profileDob").textContent = user.dob;
-        }
-    } else {
-        document.getElementById("profileDob").textContent = "Не вказано";
-    }
+	document.getElementById("welcomeText").textContent = "Привіт, " + user.name + "! 👋";
 
-    // Ставимо аватар користувача
-    if (user.avatar) {
-        document.getElementById("profileImage").src = user.avatar;
-    } else {
-        // Якщо немає аватара, поставимо стандартний
-        document.getElementById("profileImage").src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'><rect width='100' height='100' fill='%236366f1'/><text x='50%' y='55%' font-size='40' text-anchor='middle' dominant-baseline='middle'>💻</text></svg>";
-    }
+	// Аватар
+	const img = document.getElementById("profileImg");
+	if (user.avatar) {
+		img.src = user.avatar;
+		img.classList.remove("hidden");
+	} else {
+		img.classList.add("hidden");
+	}
+
+	// Object.keys + for i — виводимо дані профілю у <li> список.
+	// Навіщо Object.keys? Щоб не писати кожне поле вручну:
+	//   user.name, user.login, user.dob, user.gender ...
+	// Замість цього ми отримуємо масив ключів і проходимо по ньому циклом!
+	// Це дуже зручно, коли у об'єкта багато полів.
+	const labels = { name: "Ім'я", login: "Email", dob: "Народження", gender: "Стать" };
+	const keys = Object.keys(labels); // ["name", "login", "dob", "gender"]
+	const profileList = document.getElementById("profileDetails");
+	profileList.innerHTML = "";
+
+	for (let i = 0; i < keys.length; i++) {
+		const li = document.createElement("li"); // створюємо <li>
+		li.innerHTML = "<strong>" + labels[keys[i]] + ":</strong> " + (user[keys[i]] || "—");
+		profileList.appendChild(li);             // додаємо <li> в <ul>
+	}
 }
 
-// 10. ОНОВЛЕННЯ ЕКРАНУ: ПОКАЗАТИ ВХІД / РЕЄСТРАЦІЮ
-function showAuthForms() {
-    document.getElementById("authTabs").classList.remove("hidden");
-    document.getElementById("profileSection").classList.add("hidden");
-    
-    // За замовчуванням відкриваємо таб логіну
-    switchTab('login');
 
-    // Автозаповнення збереженого логіну, якщо ставили галочку "Запам'ятати мене"
-    const rememberedLogin = localStorage.getItem("rememberedLogin");
-    if (rememberedLogin) {
-        document.getElementById("loginEmail").value = rememberedLogin;
-        document.getElementById("rememberMe").checked = true;
-    }
-}
-
-// 11. ВИХІД З АКАУНТУ (ЛОГАУТ)
+// --- 9. ВИХІД ---
 function logout() {
-    // Видаляємо поточного юзера з сесії
-    localStorage.removeItem("currentUser");
-    
-    showAuthForms();
-    showStatus("🚪 Ви виходоли з акаунту. До зустрічі!", "success");
-    
-    // Сховати статус через 3 секунди
-    setTimeout(hideStatus, 3000);
+	localStorage.removeItem("currentUser");
+	document.getElementById("authSection").classList.remove("hidden");
+	document.getElementById("profileSection").classList.add("hidden");
 }
 
-// 12. ДОПОМІЖНІ ФУНКЦІЇ ДЛЯ СТАТУСНИХ ПОВІДОМЛЕНЬ
-function showStatus(text, type) {
-    const statusMsg = document.getElementById("statusMessage");
-    statusMsg.textContent = text;
-    statusMsg.className = `status-msg ${type}`; // додаємо клас error або success
+
+// --- 10. СПИСОК КОРИСТУВАЧІВ (createElement + appendChild + for i) ---
+function renderUserList() {
+	const ul = document.getElementById("userList");
+	ul.innerHTML = ""; // очищуємо список
+
+	if (users.length === 0) {
+		const li = document.createElement("li");
+		li.textContent = "Поки нікого немає 🤷";
+		ul.appendChild(li);
+		return;
+	}
+
+	for (let i = 0; i < users.length; i++) {
+		const li = document.createElement("li");
+		li.textContent = (i + 1) + ". " + users[i].name + " — " + users[i].login;
+		ul.appendChild(li);
+	}
 }
 
-function hideStatus() {
-    const statusMsg = document.getElementById("statusMessage");
-    statusMsg.className = "status-msg hidden";
+
+// --- ЗАПУСК ---
+renderUserList();
+
+// Перевіряємо чи вже є збережена сесія
+const savedUser = localStorage.getItem("currentUser");
+if (savedUser) {
+	showProfile(JSON.parse(savedUser));
 }
