@@ -28,3 +28,8 @@
 	min-width: 22px;
 	cursor: pointer;
 }
+
+#loginForm img {
+	width: 40px;
+	height: 40px;
+}

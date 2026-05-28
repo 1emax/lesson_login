@@ -33,6 +33,7 @@ man/woman
 <!-- Форма логіну -->
 <div id="loginForm">
 	<h2>Вітаємо, вкажіть логін та пароль</h2>
+	<img id="display-image" src=""  class="hidden" />
 	<p></p>
 	<form action="/login" method="POST">
 		<input id="login" type="text" name="login" required placeholder="Логін">
@@ -52,6 +53,7 @@ man/woman
 		<input type="password" name="password" required placeholder="Пароль">
 		<input type="text" name="name" placeholder="Імʼя" value="Іван">
 		<input type="submit" class="apply-form" value="Реєстрація">
+		<input type="file" name="avatar">
 	</form>
 </div>
 <!-- end Форма реєстрації -->
